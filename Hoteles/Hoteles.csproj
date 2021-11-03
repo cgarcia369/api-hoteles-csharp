@@ -20,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Configurations" />
       <Folder Include="Controllers" />
       <Folder Include="Data" />
       <Folder Include="Logs" />
