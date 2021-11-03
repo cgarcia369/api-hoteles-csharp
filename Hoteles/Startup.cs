@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hoteles.Configurations;
 using Hoteles.Data.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,6 +39,8 @@ namespace Hoteles
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
+            //Automapper
+            services.AddAutoMapper(typeof(MapperInitialize));
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Hoteles", Version = "v1"}); });
         }
