@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hoteles.Data.Models;
 
 namespace Hoteles.Data.Context
 {
@@ -13,5 +14,8 @@ namespace Hoteles.Data.Context
         {
 
         }
+        public  DbSet<Country> Countries { get; set; }
+        public  DbSet<Hotel> Hotels { get; set; }
+
     }
 }
