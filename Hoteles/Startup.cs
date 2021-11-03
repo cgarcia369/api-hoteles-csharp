@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hoteles.Configurations;
+using Hoteles.Contracs;
 using Hoteles.Data.Context;
+using Hoteles.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -41,6 +43,13 @@ namespace Hoteles
             });
             //Automapper
             services.AddAutoMapper(typeof(MapperInitialize));
+            services.AddTransient<IUnitOFWork, UnitOfWork>();
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+
+
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Hoteles", Version = "v1"}); });
         }
