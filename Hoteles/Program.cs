@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
 
 namespace Hoteles
 {
@@ -13,7 +15,26 @@ namespace Hoteles
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(
+                    path: "Logs\\log-.txt",
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}",
+                    rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Information
+                ).CreateLogger();
+            try
+            {
+                Log.Information("Inicializando La aplicacion (API Hotels");
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Falla al inicializar la aplicacion...");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
