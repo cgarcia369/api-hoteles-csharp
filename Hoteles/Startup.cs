@@ -6,6 +6,7 @@ using Hoteles.Configurations;
 using Hoteles.Contracs;
 using Hoteles.Data.Context;
 using Hoteles.Repository;
+using Hoteles.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -34,6 +35,9 @@ namespace Hoteles
             services.AddDbContext<DatabaseContext>(o => 
                 o.UseSqlServer(Configuration.GetConnectionString("sqlConnection"))
             );
+            services.AddAuthentication();
+            services.ConfigureIdentity();
+
             services.AddCors(c =>
             {
                 c.AddPolicy("CorsPolicy", builder =>
