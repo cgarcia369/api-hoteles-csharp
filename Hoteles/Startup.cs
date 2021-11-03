@@ -26,6 +26,13 @@ namespace Hoteles
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(c =>
+            {
+                c.AddPolicy("CorsPolicy", builder =>
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
             services.AddControllers();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Hoteles", Version = "v1"}); });
         }
@@ -43,9 +50,9 @@ namespace Hoteles
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            
+            app.UseCors("CorsPolicy");
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
