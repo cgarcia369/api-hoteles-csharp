@@ -5,10 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hoteles.Configurations.Entities;
 using Hoteles.Data.Models;
+using Hoteles.Data.Users;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Hoteles.Data.Context
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : IdentityDbContext<ApiUser>
     {
         public DatabaseContext(DbContextOptions dbContextOptions)
         : base(dbContextOptions)
