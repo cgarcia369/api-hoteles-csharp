@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hoteles.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Hoteles.Controllers
@@ -29,6 +30,7 @@ namespace Hoteles.Controllers
                 
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetCountries()
         {
@@ -45,6 +47,7 @@ namespace Hoteles.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{id:int}", Name = "GetCountry")]
         public async Task<IActionResult> GetCountry(int id)
         {
@@ -61,6 +64,7 @@ namespace Hoteles.Controllers
             }
         }
         
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateCountryDTO countryDto)
         {

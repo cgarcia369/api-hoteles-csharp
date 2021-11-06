@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hoteles.Controllers
 {
@@ -27,6 +28,7 @@ namespace Hoteles.Controllers
 
         }
         // GET: api/<HotelController>
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery]RequestParams requestParams)
         {
@@ -45,6 +47,7 @@ namespace Hoteles.Controllers
         }
 
         // GET api/<HotelController>/5
+        [Authorize]
         [HttpGet("{id:int}",Name = "GetHotel")]
         public async Task<IActionResult> Get(int id)
         {
@@ -62,7 +65,9 @@ namespace Hoteles.Controllers
             }
         }
         
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
+        
         public async Task<IActionResult> Post([FromBody] CreateHotelDTO hotelDto)
         {
             if (!ModelState.IsValid)
