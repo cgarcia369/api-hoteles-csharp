@@ -39,7 +39,24 @@ namespace Hoteles.Controllers
             {
                 var hotels = await _unitOFWork.Hotels.GetPagedList(requestParams);
                 var results = _mapper.Map<IList<HotelDTO>>(hotels);
-                return Ok(results);
+                return Ok(new
+                {
+                    Data = results,
+                    Metadata = new MetaData()
+                    {
+                        Count = hotels.Count,
+                        PageCount = hotels.PageCount,
+                        PageNumber = hotels.PageNumber,
+                        PageSize = hotels.PageSize,
+                        HasNextPage = hotels.HasNextPage,
+                        HasPreviousPage = hotels.HasPreviousPage,
+                        IsFirstPage = hotels.IsFirstPage,
+                        IsLastPage = hotels.IsLastPage,
+                        TotalItemCount = hotels.TotalItemCount,
+                        FirstItemOnPage = hotels.FirstItemOnPage,
+                        LastItemOnPage = hotels.LastItemOnPage,
+                    }
+                });
             }
             catch (Exception e)
             {
