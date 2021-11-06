@@ -241,3 +241,6 @@ Logs/
 
 # MIGRATIONS
 Migrations/
+
+# APP settings
+Hoteles/appsettings.Development.json
