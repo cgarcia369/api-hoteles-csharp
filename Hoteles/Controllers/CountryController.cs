@@ -32,6 +32,8 @@ namespace Hoteles.Controllers
 
         [Authorize]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetCountries()
         {
             try
@@ -49,11 +51,18 @@ namespace Hoteles.Controllers
 
         [Authorize]
         [HttpGet("{id:int}", Name = "GetCountry")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetCountry(int id)
         {
             try
             {
                 var country = await _unitOFWork.Countries.Get(c=>c.Id == id, new List<string>() {"Hotels"});
+                if (country == null)
+                {
+                    return NotFound();
+                }
                 var result = _mapper.Map<CountryDTO>(country);
                 return Ok(result);
             }
@@ -66,6 +75,9 @@ namespace Hoteles.Controllers
         
         [Authorize(Roles = "Administrador")]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Post([FromBody] CreateCountryDTO countryDto)
         {
             if (!ModelState.IsValid)
