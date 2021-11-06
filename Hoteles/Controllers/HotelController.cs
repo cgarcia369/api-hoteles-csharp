@@ -45,7 +45,7 @@ namespace Hoteles.Controllers
         }
 
         // GET api/<HotelController>/5
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}",Name = "GetHotel")]
         public async Task<IActionResult> Get(int id)
         {
             try
@@ -59,6 +59,29 @@ namespace Hoteles.Controllers
 
                 _logger.LogError(e, $"Something wen wrong in the {nameof(Get)}");
                 return StatusCode(500, "Internal Server error, please try Again later.");
+            }
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] CreateHotelDTO hotelDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError($"Invalid POST attemp in {nameof(CreateHotelDTO)}");
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var hotel = _mapper.Map<Hotel>(hotelDto);
+                await _unitOFWork.Hotels.Insert(hotel);
+                await _unitOFWork.Save();
+                return CreatedAtRoute("GetHotel", new { id = hotel.Id }, hotel);
+            }
+            catch (Exception e)
+            {
+
+                _logger.LogError(e, $"Something Wen Wrong in the {nameof(CreateHotelDTO)}");
+                return StatusCode(500, "Internal server Error");
             }
         }
     }
