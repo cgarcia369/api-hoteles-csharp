@@ -10,7 +10,7 @@ namespace Hoteles.Services.contracts
 {
      public interface IAuthManager
     {
-        Task<bool> ValidateUser(LoginUserDTO loginUserDTO);
+        Task<bool> ValidateUser(LoginUserDTO loginUserDto);
 
         Task<string> CreateToken();
         
