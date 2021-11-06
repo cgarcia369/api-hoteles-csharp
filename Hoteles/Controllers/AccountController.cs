@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hoteles.Services.contracts;
 
 namespace Hoteles.Controllers
 {
@@ -20,16 +21,18 @@ namespace Hoteles.Controllers
         private readonly UserManager<ApiUser> _userManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
+        private readonly IAuthManager _authManager;
 
         public AccountController(
             UserManager<ApiUser> userManager,
             ILogger<AccountController> logger,
-            IMapper mapper)
+            IMapper mapper,
+            IAuthManager authManager)
         {
             this._userManager = userManager;
             this._logger = logger;
-            _mapper = mapper; 
-
+            _mapper = mapper;
+            _authManager = authManager;
         }
         [HttpPost]
         [Route("register")]
@@ -65,6 +68,34 @@ namespace Hoteles.Controllers
             {
                 _logger.LogError(e, $"Something Went Wrong in the {nameof(Register)}");
                 return Problem($"Something  Went Wrong in the {nameof(Register)}", statusCode: 500);
+            }
+        }
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginUserDTO loginUserDTO)
+        {
+            _logger.LogInformation($"Login Attemp for {loginUserDTO.Email}");
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                if (!await _authManager.ValidateUser(loginUserDTO))
+                {
+                    return Unauthorized();
+                }
+
+                return Accepted(new {Token = await _authManager.CreateToken()});//pendiente implementar método
+
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, $"Something Went Wrong in the {nameof(Login)}");
+                return Problem($"Something  Went Wrong in the {nameof(Login)}", statusCode: 500);
             }
         }
         
