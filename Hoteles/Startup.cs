@@ -7,6 +7,7 @@ using Hoteles.Contracs;
 using Hoteles.Data.Context;
 using Hoteles.Repository;
 using Hoteles.Services;
+using Hoteles.Services.contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -48,6 +49,7 @@ namespace Hoteles
             //Automapper
             services.AddAutoMapper(typeof(MapperInitialize));
             services.AddTransient<IUnitOFWork, UnitOfWork>();
+            services.AddScoped<IAuthManager, AuthManager>();
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
