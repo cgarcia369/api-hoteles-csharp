@@ -37,7 +37,7 @@ namespace Hoteles
             );
             services.AddAuthentication();
             services.ConfigureIdentity();
-
+            services.ConfigureJWT(Configuration);
             services.AddCors(c =>
             {
                 c.AddPolicy("CorsPolicy", builder =>
