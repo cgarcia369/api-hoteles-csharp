@@ -36,7 +36,7 @@ namespace Hoteles
             services.AddDbContext<DatabaseContext>(o => 
                 o.UseSqlServer(Configuration.GetConnectionString("sqlConnection"))
             );
-            services.AddAuthentication();
+            /*services.AddAuthentication();*/
             services.ConfigureIdentity();
             services.ConfigureJWT(Configuration);
             services.AddCors(c =>
@@ -101,6 +101,7 @@ namespace Hoteles
             app.UseRouting();
             
             app.UseCors("CorsPolicy");
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
