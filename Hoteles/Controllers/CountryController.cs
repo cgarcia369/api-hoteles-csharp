@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Hoteles.Data.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -18,13 +17,13 @@ namespace Hoteles.Controllers
     [ApiController]
     public class CountryController : ControllerBase
     {
-        private readonly IUnitOFWork _unitOFWork;
+        private readonly IUnitOFWork _unitOfWork;
         private readonly ILogger<CountryController> _logger;
         private readonly IMapper _mapper;
 
-        public CountryController(IUnitOFWork unitOFWork, ILogger<CountryController> logger, IMapper mapper)
+        public CountryController(IUnitOFWork unitOfWork, ILogger<CountryController> logger, IMapper mapper)
         {
-            _unitOFWork = unitOFWork;
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
                 
@@ -38,7 +37,7 @@ namespace Hoteles.Controllers
         {
             try
             {
-                var countries = await _unitOFWork.Countries.GetAll();
+                var countries = await _unitOfWork.Countries.GetAll();
                 var results = _mapper.Map<IList<CountryDTO>>(countries);
                 return Ok(results);
             }
@@ -58,7 +57,7 @@ namespace Hoteles.Controllers
         {
             try
             {
-                var country = await _unitOFWork.Countries.Get(c=>c.Id == id, new List<string>() {"Hotels"});
+                var country = await _unitOfWork.Countries.Get(c=>c.Id == id, new List<string>() {"Hotels"});
                 if (country == null)
                 {
                     return NotFound();
@@ -69,7 +68,7 @@ namespace Hoteles.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, $"Something wen wrong in the {nameof(GetCountry)}");
-                return StatusCode(500, "Internal Server error, please try Again later."); ;
+                return StatusCode(500, "Internal Server error, please try Again later.");
             }
         }
         
@@ -88,8 +87,8 @@ namespace Hoteles.Controllers
             try
             {
                 var country = _mapper.Map<Country>(countryDto);
-                await _unitOFWork.Countries.Insert(country);
-                await _unitOFWork.Save();
+                await _unitOfWork.Countries.Insert(country);
+                await _unitOfWork.Save();
                 return CreatedAtRoute("GetCountry", new { id = country.Id}, country);
             }
             catch (Exception e)
@@ -114,15 +113,15 @@ namespace Hoteles.Controllers
             }
             try
             {
-                var country = await _unitOFWork.Countries.Get(c => c.Id == id);
+                var country = await _unitOfWork.Countries.Get(c => c.Id == id);
                 if (country == null)
                 {
                     _logger.LogError($"Invalid UPDATE attemp in {nameof(UpdateCountryDTO)}");
                     return BadRequest("Submitted data is invalid");
                 }
                 _mapper.Map(updateCountryDto, country);
-                _unitOFWork.Countries.Update(country);
-                await _unitOFWork.Save();
+                _unitOfWork.Countries.Update(country);
+                await _unitOfWork.Save();
                 return NoContent();
             }
             catch (Exception e)
@@ -146,15 +145,15 @@ namespace Hoteles.Controllers
             }
             try
             {
-                var country = await _unitOFWork.Countries.Get(c => c.Id == id);
+                var country = await _unitOfWork.Countries.Get(c => c.Id == id);
                 if (country == null)
                 {
                     _logger.LogError($"Invalid DELETE attempt in {nameof(Delete)}");
                     return BadRequest("Submitted data is invalid");
                 }
 
-                await _unitOFWork.Countries.Delete(id);
-                await _unitOFWork.Save();
+                await _unitOfWork.Countries.Delete(id);
+                await _unitOfWork.Save();
                 return NoContent();
             }
             catch (Exception e)

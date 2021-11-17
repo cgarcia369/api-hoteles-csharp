@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
 using Hoteles.Data.DTOs;
 using Hoteles.Data.Users;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Hoteles.Services.contracts;
 
@@ -23,22 +20,18 @@ namespace Hoteles.Controllers
         private readonly IMapper _mapper;
         private readonly IAuthManager _authManager;
 
-        public AccountController(
-            UserManager<ApiUser> userManager,
-            ILogger<AccountController> logger,
-            IMapper mapper,
-            IAuthManager authManager)
+        public AccountController(UserManager<ApiUser> userManager, ILogger<AccountController> logger, IMapper mapper, IAuthManager authManager)
         {
-            this._userManager = userManager;
-            this._logger = logger;
+            _userManager = userManager;
+            _logger = logger;
             _mapper = mapper;
             _authManager = authManager;
         }
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] UserDTO userDTO)
+        public async Task<IActionResult> Register([FromBody] UserDTO userDto)
         {
-            _logger.LogInformation($"Registration Attemp for {userDTO.Email}");
+            _logger.LogInformation($"Registration Attemp for {userDto.Email}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -46,10 +39,10 @@ namespace Hoteles.Controllers
 
             try
             {
-                var user = _mapper.Map<ApiUser>(userDTO);
-                user.UserName = userDTO.Email;
+                var user = _mapper.Map<ApiUser>(userDto);
+                user.UserName = userDto.Email;
 
-                var result = await _userManager.CreateAsync(user, userDTO.Password);
+                var result = await _userManager.CreateAsync(user, userDto.Password);
 
                 if (!result.Succeeded)
                 {
@@ -61,7 +54,7 @@ namespace Hoteles.Controllers
                     return BadRequest(ModelState);
                 }
 
-                await _userManager.AddToRolesAsync(user, userDTO.Roles);
+                await _userManager.AddToRolesAsync(user, userDto.Roles);
                 return Accepted();
             }
             catch (Exception e)
@@ -72,9 +65,9 @@ namespace Hoteles.Controllers
         }
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginUserDTO loginUserDTO)
+        public async Task<IActionResult> Login([FromBody] LoginUserDTO loginUserDto)
         {
-            _logger.LogInformation($"Login Attemp for {loginUserDTO.Email}");
+            _logger.LogInformation($"Login Attemp for {loginUserDto.Email}");
 
             if (!ModelState.IsValid)
             {
@@ -83,7 +76,7 @@ namespace Hoteles.Controllers
 
             try
             {
-                if (!await _authManager.ValidateUser(loginUserDTO))
+                if (!await _authManager.ValidateUser(loginUserDto))
                 {
                     return Unauthorized();
                 }

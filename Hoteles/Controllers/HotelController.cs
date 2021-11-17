@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,13 +16,13 @@ namespace Hoteles.Controllers
     [ApiController]
     public class HotelController : ControllerBase
     {
-        private readonly IUnitOFWork _unitOFWork;
+        private readonly IUnitOFWork _unitOfWork;
         private readonly ILogger<HotelController> _logger;
         private readonly IMapper _mapper;
 
-        public HotelController(IUnitOFWork unitOFWork, ILogger<HotelController> logger, IMapper mapper)
+        public HotelController(IUnitOFWork unitOfWork, ILogger<HotelController> logger, IMapper mapper)
         {
-            _unitOFWork = unitOFWork;
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
 
@@ -37,7 +36,7 @@ namespace Hoteles.Controllers
         {
             try
             {
-                var hotels = await _unitOFWork.Hotels.GetPagedList(requestParams,new List<string>(){"Country"});
+                var hotels = await _unitOfWork.Hotels.GetPagedList(requestParams,new List<string>(){"Country"});
                 var results = _mapper.Map<IList<HotelDTO>>(hotels);
                 return Ok(new
                 {
@@ -76,7 +75,7 @@ namespace Hoteles.Controllers
         {
             try
             {
-                var hotel = await _unitOFWork.Hotels.Get(h => h.Id == id, new List<string> { "Country" });
+                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id, new List<string> { "Country" });
                 if (hotel == null)
                 {
                     return NotFound();
@@ -107,8 +106,8 @@ namespace Hoteles.Controllers
             try
             {
                 var hotel = _mapper.Map<Hotel>(hotelDto);
-                await _unitOFWork.Hotels.Insert(hotel);
-                await _unitOFWork.Save();
+                await _unitOfWork.Hotels.Insert(hotel);
+                await _unitOfWork.Save();
                 return CreatedAtRoute("GetHotel", new { id = hotel.Id }, hotel);
             }
             catch (Exception e)
@@ -134,7 +133,7 @@ namespace Hoteles.Controllers
 
             try
             {
-                var hotel = await _unitOFWork.Hotels.Get(h => h.Id == id);
+                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
                 if (hotel == null)
                 {
                     _logger.LogError($"Invalid UPDATE attempt in {nameof(UpdateHotelDTO)}");
@@ -142,8 +141,8 @@ namespace Hoteles.Controllers
                 }
 
                 _mapper.Map(updateHotelDto, hotel);
-                _unitOFWork.Hotels.Update(hotel);
-                await _unitOFWork.Save();
+                _unitOfWork.Hotels.Update(hotel);
+                await _unitOfWork.Save();
                 return NoContent();
             }
             catch (Exception e)
@@ -169,15 +168,15 @@ namespace Hoteles.Controllers
 
             try
             {
-                var hotel = await _unitOFWork.Hotels.Get(h => h.Id == id);
+                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
                 if (hotel == null)
                 {
                     _logger.LogError($"Invalid DELETE attempt in {nameof(Delete)}");
                     return BadRequest("Submitted data is invalid");
                 }
 
-                await _unitOFWork.Hotels.Delete(id);
-                await _unitOFWork.Save();
+                await _unitOfWork.Hotels.Delete(id);
+                await _unitOfWork.Save();
                 return NoContent();
             }
             catch (Exception e)
