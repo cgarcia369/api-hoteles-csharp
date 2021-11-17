@@ -26,4 +26,9 @@ namespace Hoteles.Data.DTOs
 
         public int CountryId { get; set; }
     }
+
+    public class UpdateHotelDTO : CreateHotelDTO
+    {
+        
+    }
 }
