@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreRateLimit;
 using Hoteles.Configurations;
 using Hoteles.Contracs;
 using Hoteles.Data.Context;
@@ -47,10 +48,12 @@ namespace Hoteles
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
+            
             //Automapper
             services.AddAutoMapper(typeof(MapperInitialize));
             services.AddTransient<IUnitOFWork, UnitOfWork>();
             services.AddScoped<IAuthManager, AuthManager>();
+            services.AddHttpContextAccessor();
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -105,7 +108,7 @@ namespace Hoteles
             //app.UseHttpsRedirection();
 
             app.UseRouting();
-            
+            app.UseIpRateLimiting();
             app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
