@@ -72,7 +72,7 @@ namespace Hoteles.Controllers
             }
         }
         
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrator")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -99,7 +99,7 @@ namespace Hoteles.Controllers
             }
         }
 
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrator")]
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -131,7 +131,7 @@ namespace Hoteles.Controllers
             }
         }
 
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrator")]
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
