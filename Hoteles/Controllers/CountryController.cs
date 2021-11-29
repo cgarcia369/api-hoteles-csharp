@@ -16,6 +16,8 @@ namespace Hoteles.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v1")]
+    [ResponseCache (Duration = 60)]
     public class CountryController : ControllerBase
     {
         private readonly IUnitOFWork _unitOfWork;

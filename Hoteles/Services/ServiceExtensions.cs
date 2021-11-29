@@ -8,11 +8,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AspNetCoreRateLimit;
+using Hoteles.Controllers;
 using Hoteles.Data.Models;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -70,7 +74,32 @@ namespace Hoteles.Services
                 });
             });
         }
-
+        public static void ConfigureVersioning(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ApiVersionReader = new HeaderApiVersionReader("api-version");
+                options.Conventions.Controller<CountryController>().HasApiVersion(new ApiVersion(1, 0));
+                options.Conventions.Controller<CountryV2Controller>().HasDeprecatedApiVersion(new ApiVersion(2, 0));
+            });
+        }
+        public static void ConfigureHttpCacheHeaders(this IServiceCollection services)
+        {
+            services.AddResponseCaching();
+            services.AddHttpCacheHeaders(
+                (expirations) =>
+                {
+                    expirations.MaxAge = 120;
+                    expirations.CacheLocation = CacheLocation.Private;
+                },
+                (validationsOpt) =>
+                {
+                    validationsOpt.MustRevalidate = true;
+                });
+        }
         public static void ConfigureRateLimitingOptions(this IServiceCollection service)
         {
             var rateLimitRules = new List<RateLimitRule>()
