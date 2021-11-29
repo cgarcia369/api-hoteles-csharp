@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Hoteles.Configurations;
 using Hoteles.Contracs;
 using Hoteles.Data.Context;
+using Hoteles.Filters.Action;
 using Hoteles.Repository;
 using Hoteles.Services;
 using Hoteles.Services.contracts;
@@ -54,8 +55,12 @@ namespace Hoteles
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
-
-
+                
+            services.AddTransient<ValidateModelAttribute>();
+            services.AddTransient<ValidateHotelExistsAttribute>();
+            services.AddTransient<ValidateCountryExistsAttribute>();
+            services.AddTransient<ValidationModel>();
+            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

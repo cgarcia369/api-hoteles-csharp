@@ -28,7 +28,6 @@
       <Folder Include="Configurations" />
       <Folder Include="Controllers" />
       <Folder Include="Data" />
-      <Folder Include="Filters\Action" />
       <Folder Include="Logs" />
     </ItemGroup>
 
