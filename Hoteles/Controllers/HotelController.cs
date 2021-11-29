@@ -73,22 +73,13 @@ namespace Hoteles.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(int id)
         {
-            try
+            var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id, new List<string> { "Country" });
+            if (hotel == null)
             {
-                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id, new List<string> { "Country" });
-                if (hotel == null)
-                {
-                    return NotFound();
-                }
-                var result = _mapper.Map<HotelDTO>(hotel);
-                return Ok(result);
+                return NotFound();
             }
-            catch (Exception e)
-            {
-
-                _logger.LogError(e, $"Something wen wrong in the {nameof(Get)}");
-                return StatusCode(500, "Internal Server error, please try Again later.");
-            }
+            var result = _mapper.Map<HotelDTO>(hotel);
+            return Ok(result);
         }
         
         [Authorize(Roles = "Administrator")]
@@ -103,19 +94,10 @@ namespace Hoteles.Controllers
                 _logger.LogError($"Invalid POST attemp in {nameof(CreateHotelDTO)}");
                 return BadRequest(ModelState);
             }
-            try
-            {
-                var hotel = _mapper.Map<Hotel>(hotelDto);
-                await _unitOfWork.Hotels.Insert(hotel);
-                await _unitOfWork.Save();
-                return CreatedAtRoute("GetHotel", new { id = hotel.Id }, hotel);
-            }
-            catch (Exception e)
-            {
-
-                _logger.LogError(e, $"Something Wen Wrong in the {nameof(CreateHotelDTO)}");
-                return StatusCode(500, "Internal server Error");
-            }
+            var hotel = _mapper.Map<Hotel>(hotelDto);
+            await _unitOfWork.Hotels.Insert(hotel);
+            await _unitOfWork.Save();
+            return CreatedAtRoute("GetHotel", new { id = hotel.Id }, hotel);
         }
         
         [Authorize(Roles = "Administrator")]
@@ -130,26 +112,17 @@ namespace Hoteles.Controllers
                 _logger. LogError ($"Invalid UPDATE attempt in {nameof (UpdateHotelDTO)}");
                 return BadRequest (ModelState);
             }
-
-            try
+            var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
+            if (hotel == null)
             {
-                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
-                if (hotel == null)
-                {
-                    _logger.LogError($"Invalid UPDATE attempt in {nameof(UpdateHotelDTO)}");
-                    return BadRequest("Submitted date is invalid");
-                }
+                _logger.LogError($"Invalid UPDATE attempt in {nameof(UpdateHotelDTO)}");
+                return BadRequest("Submitted date is invalid");
+            }
 
-                _mapper.Map(updateHotelDto, hotel);
-                _unitOfWork.Hotels.Update(hotel);
-                await _unitOfWork.Save();
-                return NoContent();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError (e, $"Something ien Wrong in the {nameof (UpdateHotelDTO)}");
-                return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-            }
+            _mapper.Map(updateHotelDto, hotel);
+            _unitOfWork.Hotels.Update(hotel);
+            await _unitOfWork.Save();
+            return NoContent();
         }
             
             
@@ -165,25 +138,16 @@ namespace Hoteles.Controllers
                 _logger. LogError($"Something Wen Wrong in the {nameof (Delete)}");
                 return BadRequest();
             }
-
-            try
+            var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
+            if (hotel == null)
             {
-                var hotel = await _unitOfWork.Hotels.Get(h => h.Id == id);
-                if (hotel == null)
-                {
-                    _logger.LogError($"Invalid DELETE attempt in {nameof(Delete)}");
-                    return BadRequest("Submitted data is invalid");
-                }
+                _logger.LogError($"Invalid DELETE attempt in {nameof(Delete)}");
+                return BadRequest("Submitted data is invalid");
+            }
 
-                await _unitOfWork.Hotels.Delete(id);
-                await _unitOfWork.Save();
-                return NoContent();
-            }
-            catch (Exception e)
-            {
-                _logger. LogError(e, $"Something ien Wrong in the {nameof (Delete)}");
-                return BadRequest();
-            }
+            await _unitOfWork.Hotels.Delete(id);
+            await _unitOfWork.Save();
+            return NoContent();
         }
     }
 }

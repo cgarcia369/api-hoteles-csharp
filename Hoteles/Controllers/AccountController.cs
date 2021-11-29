@@ -37,32 +37,23 @@ namespace Hoteles.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var user = _mapper.Map<ApiUser>(userDto);
+            user.UserName = userDto.Email;
 
-            try
+            var result = await _userManager.CreateAsync(user, userDto.Password);
+
+            if (!result.Succeeded)
             {
-                var user = _mapper.Map<ApiUser>(userDto);
-                user.UserName = userDto.Email;
-
-                var result = await _userManager.CreateAsync(user, userDto.Password);
-
-                if (!result.Succeeded)
+                foreach (var error in result.Errors)
                 {
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(error.Code, error.Description);
-                    }
-
-                    return BadRequest(ModelState);
+                    ModelState.AddModelError(error.Code, error.Description);
                 }
 
-                await _userManager.AddToRolesAsync(user, userDto.Roles);
-                return Accepted();
+                return BadRequest(ModelState);
             }
-            catch (Exception e)
-            {
-                _logger.LogError(e, $"Something Went Wrong in the {nameof(Register)}");
-                return Problem($"Something  Went Wrong in the {nameof(Register)}", statusCode: 500);
-            }
+
+            await _userManager.AddToRolesAsync(user, userDto.Roles);
+            return Accepted();
         }
         [HttpPost]
         [Route("login")]
@@ -74,31 +65,20 @@ namespace Hoteles.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            try
+            if (!await _authManager.ValidateUser(loginUserDto))
             {
-                if (!await _authManager.ValidateUser(loginUserDto))
-                {
-                    return Unauthorized();
-                }
-
-                var user = await _userManager.FindByEmailAsync(loginUserDto.Email);
-                var rol = await _userManager.GetRolesAsync(user);
-                
-                return Accepted(new {Token = await _authManager.CreateToken(),User = new {
-                    firstName = user.FirstName,
-                    lastName = user.LastName,
-                    email = user.Email,
-                    rol = rol[0]
-                }});
-
+                return Unauthorized();
             }
-            catch (Exception ex)
-            {
 
-                _logger.LogError(ex, $"Something Went Wrong in the {nameof(Login)}");
-                return Problem($"Something  Went Wrong in the {nameof(Login)}", statusCode: 500);
-            }
+            var user = await _userManager.FindByEmailAsync(loginUserDto.Email);
+            var rol = await _userManager.GetRolesAsync(user);
+            
+            return Accepted(new {Token = await _authManager.CreateToken(),User = new {
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                email = user.Email,
+                rol = rol[0]
+            }});
         }
 
         [HttpGet]
