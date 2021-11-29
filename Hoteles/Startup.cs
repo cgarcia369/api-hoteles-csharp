@@ -63,11 +63,16 @@ namespace Hoteles
             services.AddTransient<ValidateHotelExistsAttribute>();
             services.AddTransient<ValidateCountryExistsAttribute>();
             services.AddTransient<ValidationModel>();
-            
-            services.AddControllers();
+            services.ConfigureRateLimitingOptions();
+            /*services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();*/
+            services.AddMemoryCache();
+            services.ConfigureHttpCacheHeaders();
+
+
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Hoteles", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Hotels by Country", Version = "v1" });
+                c.SwaggerDoc("v2", new OpenApiInfo { Title = "Hotels by Country", Version = "v2" });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",
@@ -91,7 +96,21 @@ namespace Hoteles
                         new string[]{}
                     }
                 });
+
             });
+            services.AddControllers( config =>
+                {
+                    config.CacheProfiles.Add("120secondsDuration", new CacheProfile()
+                    {
+                        Duration = 120
+                    });
+                }
+                
+            ).AddNewtonsoftJson(
+                options => options.SerializerSettings.ReferenceLoopHandling =
+                    Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            services.ConfigureVersioning();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,15 +120,19 @@ namespace Hoteles
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Hoteles v1"));
+                app.UseSwaggerUI(s =>
+                {
+                    s.SwaggerEndpoint("/swagger/v1/swagger.json", "Hotel Listig API v1");
+                    s.SwaggerEndpoint("/swagger/v2/swagger.json", "Hotel Listig API v2");
+                });
             }
             app.ConfigureExceptionHandler();
-
             //app.UseHttpsRedirection();
-
-            app.UseRouting();
-            app.UseIpRateLimiting();
+            //app.UseIpRateLimiting();
             app.UseCors("CorsPolicy");
+            app.UseResponseCaching();
+            app.UseHttpCacheHeaders();
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
