@@ -100,23 +100,24 @@ namespace Hoteles.Services
                     validationsOpt.MustRevalidate = true;
                 });
         }
-        public static void ConfigureRateLimitingOptions(this IServiceCollection service)
+        public static void ConfigureRateLimitingOptions(this IServiceCollection services)
         {
-            var rateLimitRules = new List<RateLimitRule>()
+            var rateLimitRules = new List<RateLimitRule>
             {
-                new RateLimitRule()
+                new RateLimitRule
                 {
-                    Endpoint = "+",
-                    Limit = 3,
+                    Endpoint = "*",
+                    Limit= 3,
                     Period = "5m"
                 }
             };
-            service.Configure<IpRateLimitOptions>(options =>
+            services.Configure<IpRateLimitOptions>(opt =>
             {
-                service.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
-                service.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-                service.AddSingleton<IRateLimitConfiguration,RateLimitConfiguration>();
+                opt.GeneralRules = rateLimitRules;
             });
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
         }
     
 

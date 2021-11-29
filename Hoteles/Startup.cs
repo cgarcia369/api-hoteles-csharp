@@ -53,7 +53,6 @@ namespace Hoteles
             services.AddAutoMapper(typeof(MapperInitialize));
             services.AddTransient<IUnitOFWork, UnitOfWork>();
             services.AddScoped<IAuthManager, AuthManager>();
-            services.AddHttpContextAccessor();
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -63,10 +62,14 @@ namespace Hoteles
             services.AddTransient<ValidateHotelExistsAttribute>();
             services.AddTransient<ValidateCountryExistsAttribute>();
             services.AddTransient<ValidationModel>();
-            services.ConfigureRateLimitingOptions();
+            
+
             /*services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();*/
-            services.AddMemoryCache();
             services.ConfigureHttpCacheHeaders();
+
+            services.AddMemoryCache();
+            services.ConfigureRateLimitingOptions();
+            services.AddHttpContextAccessor();
 
 
             services.AddSwaggerGen(c =>
@@ -128,10 +131,11 @@ namespace Hoteles
             }
             app.ConfigureExceptionHandler();
             //app.UseHttpsRedirection();
-            //app.UseIpRateLimiting();
+            
             app.UseCors("CorsPolicy");
             app.UseResponseCaching();
             app.UseHttpCacheHeaders();
+            app.UseIpRateLimiting();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
