@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AspNetCoreRateLimit;
 using Hoteles.Data.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -69,6 +70,26 @@ namespace Hoteles.Services
                 });
             });
         }
+
+        public static void ConfigureRateLimitingOptions(this IServiceCollection service)
+        {
+            var rateLimitRules = new List<RateLimitRule>()
+            {
+                new RateLimitRule()
+                {
+                    Endpoint = "+",
+                    Limit = 3,
+                    Period = "5m"
+                }
+            };
+            service.Configure<IpRateLimitOptions>(options =>
+            {
+                service.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+                service.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+                service.AddSingleton<IRateLimitConfiguration,RateLimitConfiguration>();
+            });
+        }
+    
 
     }
 }
