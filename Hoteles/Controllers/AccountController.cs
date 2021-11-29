@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Hoteles.Services.contracts;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hoteles.Controllers
 {
@@ -81,7 +82,15 @@ namespace Hoteles.Controllers
                     return Unauthorized();
                 }
 
-                return Accepted(new {Token = await _authManager.CreateToken()});//pendiente implementar método
+                var user = await _userManager.FindByEmailAsync(loginUserDto.Email);
+                var rol = await _userManager.GetRolesAsync(user);
+                
+                return Accepted(new {Token = await _authManager.CreateToken(),User = new {
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    email = user.Email,
+                    rol = rol[0]
+                }});
 
             }
             catch (Exception ex)
@@ -91,7 +100,28 @@ namespace Hoteles.Controllers
                 return Problem($"Something  Went Wrong in the {nameof(Login)}", statusCode: 500);
             }
         }
-        
+
+        [HttpGet]
+        [Authorize]
+        public async  Task<IActionResult> VerifyToken()
+        {
+            var identityName = HttpContext.User.Identity?.Name;
+            ApiUser user;
+            if (identityName != null)
+            {
+                user = await _userManager.FindByEmailAsync(identityName);
+                var rol = await _userManager.GetRolesAsync(user);
+                return Ok(new
+                {
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    email = user.Email,
+                    rol = rol[0]
+                });
+            }
+
+            return BadRequest();
+        }
 
     }
 }
