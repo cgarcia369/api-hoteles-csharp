@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hoteles.Data.Models;
+using Hoteles.Filters.Action;
 using Microsoft.AspNetCore.Authorization;
 
 
@@ -45,13 +46,10 @@ namespace Hoteles.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ServiceFilter(typeof(ValidateCountryExistsAttribute))]
         public async Task<IActionResult> GetCountry(int id)
         {
             var country = await _unitOfWork.Countries.Get(c=>c.Id == id, new List<string>() {"Hotels"});
-            if (country == null)
-            {
-                return NotFound();
-            }
             var result = _mapper.Map<CountryDTO>(country);
             return Ok(result);
         }
@@ -61,18 +59,13 @@ namespace Hoteles.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ServiceFilter(typeof(ValidationModel))]
         public async Task<IActionResult> Post([FromBody] CreateCountryDTO countryDto)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError($"Invalid POST attemp in {nameof(CreateCountryDTO)}");
-                return BadRequest(ModelState);
-            }
             var country = _mapper.Map<Country>(countryDto);
             await _unitOfWork.Countries.Insert(country);
             await _unitOfWork.Save();
             return CreatedAtRoute("GetCountry", new { id = country.Id}, country);
-            
         }
 
         [Authorize(Roles = "Administrator")]
@@ -80,19 +73,11 @@ namespace Hoteles.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ServiceFilter(typeof(ValidationModel))]
+        [ServiceFilter(typeof(ValidateCountryExistsAttribute))]
         public async Task<IActionResult> Put(int id, [FromBody] UpdateCountryDTO updateCountryDto)
         {
-            if (!ModelState.IsValid || id < 1)
-            {
-                _logger.LogError ($"Invalid UPDATE attemp in {nameof (UpdateCountryDTO)}");
-                return BadRequest(ModelState);
-            }
             var country = await _unitOfWork.Countries.Get(c => c.Id == id);
-            if (country == null)
-            {
-                _logger.LogError($"Invalid UPDATE attemp in {nameof(UpdateCountryDTO)}");
-                return BadRequest("Submitted data is invalid");
-            }
             _mapper.Map(updateCountryDto, country);
             _unitOfWork.Countries.Update(country);
             await _unitOfWork.Save();
@@ -104,20 +89,11 @@ namespace Hoteles.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ServiceFilter(typeof(ValidateCountryExistsAttribute))]
         public async Task<IActionResult> Delete(int id)
         {
-            if (id < 1)
-            {
-                _logger. LogError($"Something Wen Wrong in the {nameof (Delete) }");
-                return BadRequest();
-            }
-            var country = await _unitOfWork.Countries.Get(c => c.Id == id);
-            if (country == null)
-            {
-                _logger.LogError($"Invalid DELETE attempt in {nameof(Delete)}");
-                return BadRequest("Submitted data is invalid");
-            }
 
+            var country = await _unitOfWork.Countries.Get(c => c.Id == id);
             await _unitOfWork.Countries.Delete(id);
             await _unitOfWork.Save();
             return NoContent();
